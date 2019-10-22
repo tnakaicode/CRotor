@@ -1,0 +1,18 @@
+# VSCode
+.vscode/*
+
+# Build
+*.o
+bin/esprop
+bin/jplot
+bin/jplote
+bin/xrotor
+plotlib/libPlt.a
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyc[cod]
+
+# data
+# tmp/*
