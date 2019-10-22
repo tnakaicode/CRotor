@@ -1,0 +1,20 @@
+
+README CROTOR v755-ES1.0 
+---------------------------------------------------------------
+
+Makefiles are currently Ubuntu/gfortran (just make sure gfortran 
+and xorg-dev are installed). Or configure config.make (plotlib) 
+and Makefile (bin) for your system. The other Makefiles include 
+Esotec sources but have not been tested. 
+
+cd ... /plotlib
+make
+
+cd ... /bin
+make
+
+The ESPROP utility is included in the build. The esotec directory 
+contains a sample ESPROP database along with XROTOR restart files 
+and airfoil sets to expedite evaluation of CROTOR and ESLOFTX.
+
+PJC

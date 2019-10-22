@@ -1,0 +1,576 @@
+﻿
+SUBROUTINE CROTOR User Guide           Last update: 5 October 2011
+------------------------------------------------------------------
+Philip Carter
+Esotec Developments
+philip (at) esotec (dot) org
+
+Current versions: 
+XROTOR code v7.55
+Subroutine CROTOR v0.85
+CROTOR Package: v755-ES1.0
+
+
+What is CROTOR?
+---------------
+CROTOR automates the tedious manual VPUT/VGET procedure for 
+designing or analysing counter-rotating rotors in XROTOR while 
+providing an effective user interface and reporting. 
+
+Rotors can be designed directly in CROTOR or imported from XROTOR. 
+When rotors are designed or loaded into CROTOR, the geometries, 
+names and imposed slipstreams are stored in CROTOR to be loaded into 
+XROTOR as required. 
+
+When operating parameters and geometries of two rotors have been 
+defined, the code converges the dual-rotor system by loading and 
+analysing the forward and aft rotors alternately, the slipstreams 
+being updated upon each iteration. When the thrust of each rotor 
+converges, the iteration stops and the output for both rotors is 
+displayed. Each rotor can then be run independently in the converged 
+slipstream for closer inspection.
+
+To reduce the complexity of working with multiple rotors and input, 
+a Default Input system is used which allows the user to progress 
+efficiently through a design study. 
+
+
+Menu
+----
+CROT at Top Level:
+
+.CROT c> ?
+
+     INPU    Input default operating parameters
+     LFWD    Load and store forward rotor
+     LAFT    Load and store aft rotor
+     DFWD    Design forward rotor
+     DAFT    Design aft rotor
+     SFWD f  Save forward rotor to disk
+     SAFT f  Save aft rotor to disk
+
+     PFWD r  Change power forward rotor
+     PAFT r  Change power aft rotor
+     RFWD r  Change rpm forward rotor
+     RAFT r  Change rpm aft rotor
+     VELO r  Change flight speed
+     VELW    Change slipstream velocity weights
+     VCLR    Initialize slipstream velocity profiles
+    
+     POWE r  Run CR analysis (specified power)
+     RPM  r  Run CR analysis (specified rpm, fixed pitch)
+     FWD  r  Run forward rotor in current slipstream
+     AFT  r  Run aft rotor in current slipstream
+
+     FIX     Fixed pitch/rpm toggle
+     SYNC    Synchronize rpms toggle
+     ANGL r  Change blade angles current rotor
+     CLCR r  Change lift coefficients for MIL design  
+     ATMO r  Set fluid properties from standard atmosphere
+     BLEN    Interpolate between stored rotor geometries
+     NAME s  Change CR case name
+     NFWD s  Change forward rotor name
+     NAFT s  Change aft rotor name
+
+     CRIT i  Change CR iteration limit
+     CCON r  Change CR convergence delta (del_thrust/thrust)
+     FORM    Toggle between Graded Mom. and Potential Form
+     VRTX    Toggle between Graded Mom. and Vortex Form
+     WAKE    Toggle between rigid and self-deforming wake
+     INIT    Initialize next analysis case
+     REIN    Re-initialize rotor to known operating state
+
+     DISI    Display current CR Default Input and status
+     DISS    Display current CR external slipstreams
+     DISV    Display current CR average induced velocities
+     DISP    Display current rotor operating state
+     WRIT f  Write current rotor operating state to disk
+     WRIV f  Write current induced velocities to disk
+     TERS    Toggle between terse and verbose output
+
+     PLOT i  Plot various rotor parameters
+     ANNO    Annotate plot
+     HARD    Hardcopy current plot
+     SIZE r  Change plot-object size
+
+.CROT c>
+
+Note that commands ending in FWD or AFT, along with the INPU 
+command, can omit the final two characters. Hence:
+IN     input
+LF,LA  load
+DF,DA  design
+SF,SA  save
+PF,PA  power
+RF,RA  rpm
+NF,NA  name
+
+Many commands are the same as those in OPER or at Top Level. 
+Only the differences will be explained here. 
+
+
+INPU    Input default operating parameters
+----
+Must be run before any design or analysis commands become 
+available. Reads in default operating parameters. Can be run 
+later at any time or fwd/aft data can be changed independently. 
+
+INPU assumes the common case that each rotor absorbs equal power. 
+Since synchronized rpms at 1:1 ratio is the default, when first 
+running INPU the user is asked to enter rpm only once. The rpm 
+ratio can be changed after Default Input has been entered, or rotor
+power and rpm can be set independently (see SYNC). 
+  
+Run DISI at any time to display the current Default Input 
+along with slipstream and rotor status.
+
+
+LFWD    Load and store forward rotor
+LAFT    Load and store aft rotor
+----
+Rotors can be loaded into CROTOR from disk (XROTOR restart file), 
+or <ret> at the prompt stores the rotor currently loaded in XROTOR. 
+
+
+DFWD    Design forward rotor
+DAFT    Design aft rotor
+----
+Rotors can be designed as soon as INPU is run. By default the user is
+prompted for the following data (radii in meters):
+  Rotor name
+  Blade number
+  Radius
+  Hub radius
+  Wake displacement radius 
+
+<ret> at the first prompt will take this information from the currently
+loaded rotor (if it exists). This feature allows for rapid redesign. The 
+rotor name is reset to 'Designed Rotor'.
+
+Modifying any of these parameters requires going through the list; the rotor
+name is required each time, then in each case <ret> for the current value.
+
+When input parameters have been specified a MIL rotor is designed in the current
+slipstream. Note that each design iteration is run in the slipstream resulting 
+from the previous solution with the appropriate weights applied. 
+
+Note the difference:
+Analysis mode: each solution imposes a slipstream on the OTHER rotor (FWD/AFT).
+Design mode: each design is in a slipstream defined by the PREVIOUS solution. 
+This allows flexibility in designing a forward rotor before an aft rotor exists.
+
+It is important to note that the XROTOR design routines yield MIL for rotors 
+in isolation, without considering their influence on a second rotor. Ways around 
+this limitation are discussed in an addendum.
+
+
+SFWD f  Save forward rotor to disk
+SAFT f  Save aft rotor to disk
+----
+These commands write standard XROTOR restart files including current external 
+slipstream data. With no command input, the current filename will be used 
+if it exists (Save). Command input will override a stored filename (Save As).
+
+
+PFWD ---> RAFT
+--------------
+Change default operating parameters. Self-explanatory. If rotors are 
+synchronized, RFWD and RAFT will affect each other accordingly. 
+
+
+VELO r  Change flight speed
+----
+To maintain stable Default Input, CROTOR imposes its flight speed 
+setting over that imported with rotors or set elsewhere in XROTOR. 
+Other settings beyond those covered by Default Input will take the 
+value of the last rotor loaded from disk. Altitude is not imposed 
+by CROTOR but takes the value of zero or of the last imported rotor 
+and is displayed with Default Input data.
+
+
+VELW    Change slipstream velocity weights
+VCLR    Initialize slipstream velocity profiles
+----
+Default velocity weights represent the most common case: counter-
+rotating rotors close together or in a duct (see XROTOR User Guide). 
+Other cases can be treated through this command. 
+
+VCLR zeros the current external slipstream in XROTOR as well as the 
+stored slipstreams in CROTOR.
+
+
+POWE r  Run CR analysis (specified power)
+RPM  r  Run CR analysis (specified rpm, fixed pitch)
+----
+Analogous to the same commands in OPER while converging a 
+counter-rotating system. 
+
+Running either POWE or RPM is required to converge a CR system. 
+When the system is converged, CROTOR displays output data for 
+both rotors along with some system-wide data and an induced-
+velocities plot for the converged system. (This plot can be 
+accessed later as PLOT 13.)
+
+No input:     Default Input is used. 
+
+POWE (input): Total power input for both rotors. Each rotor is 
+              assigned input power of input/2.
+
+RPM (input):  Rpm of each rotor (if not synchronized).
+              Rpm of forward rotor (if synchronized).
+
+If command input is entered the Default Input is updated when the 
+system is converged. Henceforth the Default Input will reflect 
+the current operating parameters until some parameter is changed 
+directly or by further command input.
+
+POWE and RPM will run at least 6 iterations even if the 
+slipstream is already converged. 2 iterations per rotor are 
+required to set the converged flag, then each rotor is run 
+once again to display output data. 
+
+POWE runs different routines according to the state of the 
+fixed pitch/rpm toggle (FIX) and synchronization toggle (SYNC).
+
+POWE run with fixed pitch and synchronization converges to an 
+approximation of specified total power (being the command input 
+or the sum of the Default Input power settings). If the default 
+power inputs are then adjusted proportionally, the system will 
+converge more accurately on total input power.
+
+
+FWD  r  Run forward rotor in current slipstream
+AFT  r  Run aft rotor in current slipstream
+----
+Use these commands to run the respective rotors in the current 
+slipstream (converged or not). Equivalent to running RPM in OPER 
+with an external slipstream present, including all output, 
+reporting and plotting.
+
+FWD and AFT each update the stored external slipstream at the other 
+rotor, so it is possible to "manually" converge a CR system by 
+alternate use of these two commands. 
+
+No input: If the slipstream is converged, output will reflect the
+          specified rotor at the converged CR state (Default Input).
+
+With input: Runs rotor at specified rpm. Messages will remind 
+            the user that operation is off the converged state. 
+
+Use FWD and AFT to switch between stored rotors. These commands 
+are most useful for looking specifically at one rotor in a 
+converged slipstream. 
+
+
+FIX   (default: fixed rpm, variable pitch)
+----
+Toggles between fixed pitch or fixed rpm. 
+Sets analysis mode for POWE. 
+
+
+SYNC  (default: synchronized at 1:1 ratio)
+----
+Toggles between synchronized and unsynchronized rpm. 
+Unsynchronized rpm corresponds to rotors that are not 
+mechanically connected, while synchronized rpm relates 
+to rotors that are mechanically connected. 
+
+Rotors can be synchronized at any rpm ratio. The ratio is set when 
+turning synchronization on. To change the rpm ratio, toggle SYNC off 
+then on again. The aft rotor will be adjusted to the correct rpm 
+relative to the forward rotor. With synched rotors, changing either 
+rpm (RFWD or RAFT) will change the other accordingly.
+
+The ratio feature is intended to permit this line of inquiry, 
+but more importantly to accommodate practical compromises in 
+transmission geometry. 
+
+
+CLCR  (defaults: 0.6, 0.6)
+----
+Sets root and tip lift coefficients for MIL design within CROTOR.
+
+
+BLEN
+----
+Interpolates between geometries of stored rotors. The usefulness 
+of this feature remains to be seen. The idea is that a MIL rotor 
+designed in a slipstream will compensate for characteristics of 
+the second rotor to achieve MIL of the system. Hence the rotor 
+geometries are coupled through the slipstream, and the BLEN 
+command can provide a means to redistribute loading, etc.
+
+The user is asked for an interpolation factor (FWD  0 <---> 1  AFT),
+and whether chords, blade angles or both are to be interpolated. 
+
+BLEN replaces the current rotor with the interpolated rotor. 
+
+The BLEN command requires that the loaded rotors have the same 
+radii and blade stations. A graceful exit is provided if this 
+is not the case. 
+
+
+NAME s  Change CR case name 
+NFWD s  Change forward rotor name
+NAFT s  Change aft rotor name
+----
+Naming becomes more important when keeping track of multiple rotors. 
+Five names are stored by CROTOR: the name and filename of each rotor 
+and the CR case name. 
+
+
+CRIT  (default: 20)
+----
+Converging a CR system will rarely take more than 20 iterations 
+unless the system is highly stressed through blade stall or mach 
+effects. Rather than increasing the interation limit, running the 
+same command again will continue converging the slipstream where 
+the previous iteration left off. 
+
+Note that the POWE command run with synchronized rotors and fixed 
+pitch converges the system twice (first unsynchronized, then 
+synchronized at an adjusted rpm), and thus requires more iterations 
+to converge. 
+
+
+CCON  (default: 0.001)
+----
+The CR iteration runs until del_thrust/thrust is less than CCON 
+for each rotor (del_thrust being the change in thrust output from 
+the previous iteration on that rotor), then each rotor is run again 
+to display output. 
+
+
+DISI
+----
+Displays current Default Input along with slipstream and rotor 
+status. Displayed also when Default Input is changed. 
+
+
+DISS
+----
+Displays current external slipstreams at each rotor. A tabular 
+format is used for rotors of identical radii and blade stations; 
+otherwise a serial format is used. 
+
+
+DISV
+----
+Displays current average induced velocities generated by each 
+rotor, along with CR system totals. A tabular format is used for 
+rotors of identical radii and blade stations; otherwise a serial 
+format is used. 
+
+
+DISP
+----
+Displays current rotor operating state. Identical to the same 
+command in OPER.
+
+
+WRIT
+----
+Writes current rotor operating state to disk. Equivalent to the 
+same command in OPER except the CR system Default Input is appended.
+
+
+WRIV
+----
+Writes current average induced velocity profiles to disk.
+
+
+PLOT
+----
+Plot 13 brings up a combined induced velocities plot for the 
+current converged CR system (displayed also when a CR system 
+is converged with POWE or RPM). 
+
+
+
+Convergence Menu                             (used also in PARA)
+----------------------------------------------------------------
+There are many reasons why a design or analysis point won't 
+converge - stalled blades and mach effects are two of the biggest
+cuprits. When an analysis routine does not converge during a CR 
+iteration, a single failed operating point can destroy the whole
+solution, so the user is presented with the convergence prompt. 
+As standard in Drela/Youngren codes the ? command brings up the 
+associated menu:
+
+..CONV c> ?
+
+     <ret>    Continue
+     AUTO <a> Auto-initialize blade angles and continue
+     ANGL r   Change blade angles manually
+     FORM     Toggle between Graded Mom.and Potential Form
+     VRTX     Toggle between Graded Mom.and Vortex Form
+     WAKE     Toggle between rigid and self-deforming wake
+     INIT     Initialize next analysis case
+     REIN     Re-initialize rotor to known operating state
+     ASET     Change AUTO settings
+     STOP     Abort and return to CROTOR prompt
+
+.CONV c>
+
+Most commands duplicate those in OPER and at Top Level.
+
+<ret> tries to converge the current analysis point, regardless
+of any changes to the current rotor or settings. When successful
+the CR algorithm continues. 
+
+AUTO is available only for the POWE command with variable pitch. 
+In this mode the analysis routine is sensitive to initial blade 
+angle. In some cases the routine likes to converge from higher 
+loading, in other cases from lower loading (depending on issues
+such as blade stall, mach number and so on). 
+
+The AUTO command calculates the velocity vector at a specified 
+blade radius and rotates the blade to match it before the 
+analysis is run. If that fails, the blade is rotated to 
+progressively greater increments above and below the velocity 
+vector. If the routine fails to converge after a specified 
+number of attempts the user is returned to the convergence prompt. 
+See Espara_doc.txt for more details.
+
+
+ASET
+----
+Change AUTO settings:
+
+- Maximum number of convergence attempts (default: n = 5).
+
+- Maximum deviation from the velocity vector to which the blades 
+  will be rotated, in degrees (default 10.0).
+
+- Blade location where the velocity vector is sampled (default: 0.7).
+  (Note that this is the relative distance from root to tip, not 
+  the radius.)
+
+
+Entering and leaving CROTOR
+---------------------------
+
+When first running CROTOR the INPU command must be issued and rotors
+loaded or designed before any analysis commands become available.
+
+Upon leaving CROTOR the current rotor remains the loaded rotor in 
+XROTOR along with the current external slipstream profile. 
+
+When returning to CROTOR the name of the loaded rotor is compared with 
+the name of the current rotor in CROTOR. If the names match, the current 
+rotor in CROTOR is automatically updated (whether or not the geometry has 
+been modified). If the filename has changed, this also is updated. 
+Messages are displayed to this effect.
+
+This allows the user to seamlessly go from CROTOR to MODI, for instance, 
+modify the geometry, then return to CROTOR and continue. Upon returning 
+the Default Input remains in place, with the system unconverged.
+
+If the name of the loaded rotor doesn't match the current rotor name upon
+returning to CROTOR the stored rotors are not updated. The loaded rotor 
+can be stored using LFWD or LAFT if desired.
+
+
+Limitations
+-----------
+
+While the core code should work with rotors of arbitrary geometries, 
+plotting (Plot 13) and blending (BLEN) require identical radii and 
+blade stations. Slipstream and induced velocity data are displayed 
+in serial format when blade stations are dissimilar.
+
+
+ADDENDUM: An Approach to Designing CR systems in CROTOR
+--------------------------------------------------------
+To design a system from scratch:
+
+1. Set default operating parameters (INPU).
+
+2. Clear slipstreams (VCLR).
+
+3. Design a forward rotor (DFWD). 
+
+4. Run DFWD again, <ret> at the prompt to leave parameters unchanged.
+   Watch the geometry plot as you do so; you will notice chords
+   decrease since the second design is in a slipstream. Repeating 
+   DFWD will in effect converge on a MIL forward rotor running in 
+   an axial slipstream from a similarly loaded aft rotor.
+
+5. When the forward rotor is converged, design an aft rotor with DAFT.
+   <ret> at the prompt to use the same parameters (remember to change 
+   the aft rotor name later). This design is in an axial and tangential 
+   slipstream from the forward rotor. 
+
+6. Converge the system with the RPM command. (POWE can also be used,
+   but for now we want to keep blade angles fixed.)
+
+Very likely you will observe that the aft rotor is too highly loaded
+towards the root, which in turn unloads the forward rotor root. 
+XROTOR's MIL design code considers MIL of the rotor, not of the system!
+
+Assuming the rotors have similar power input, a forward rotor designed 
+as in step 4 will be very close to optimum and it serves no purpose to 
+redesign in a slipstream from a flawed aft rotor. Rather, an effective
+approach is to modify aft rotor geometry in MODI.
+
+Since the aft rotor is operating in a slipstream with both axial and
+tangential components, resultant velocities are higher than at the 
+forward rotor; consequently, given similar lift coefficients, an 
+optimized aft rotor will typically have a slightly smaller chord (in
+particular at the root) and slightly less twist.
+
+7. Make a note of forward and aft rotor root chords, blade angles and 
+   lift coefficients. Make sure the aft rotor is loaded (if not, AFT), 
+   then return to Top Level and go to MODI.
+
+8. Using either SCAL or MODC reduce chord at the root to slightly 
+   (~5-15%) less than that of the forward rotor. 
+
+9. Using either TLIN or MODB reduce blade angle towards the root 
+   (in TLIN increase tip angle) by ~1-3 degrees.
+
+10.Return to CROTOR (the modified geometry will come with you). This
+   time run POWE which adjusts the pitch of the modified aft rotor to 
+   meet input power and rpm. Note changes to the induced velocities, 
+   lift coefficients, etc. 
+
+11.Return to MODI and adjust blade angles based on this information.
+   The goal is to return the forward rotor to its design condition 
+   and remove the tangential slipstream by adjusting the aft rotor
+   geometry. When this is achieved the two rotors will be similarly 
+   loaded across the disk, with the aft rotor typically demonstrating 
+   slightly higher efficiency since it extracts energy from (sails in) 
+   the tangential flow from the forward rotor. 
+
+Another approach is to design a forward rotor (as above), then store
+the same geometry in the aft rotor (LAFT then <ret> at the prompt). 
+Run RPM or POWE to converge the system, then make adjustments to the 
+aft rotor in MODI, as above, to return the forward rotor to its 
+design condition.
+
+
+Reflections on CROTOR
+---------------------
+CROTOR can do nothing that cannot in principle by done manually by
+using the VPUT and VGET commands. For anything but the simplest case,
+however, this process is laborious to say the least. To make this
+capability accessible CROTOR provides an interface for the input and 
+output of data along with the automation of repetitive tasks. 
+
+CROTOR is a curious beast, since XROTOR was never designed with 
+counter-rotation in mind. The model is quite different from DFDC, 
+for instance, a later code by the authors that places the flow 
+field as primary, actuator disks as the entities acting upon that 
+flow field, and rotors (propellers) as the consequent rotating 
+bladed entities designed to aerodynamically mimic the actuator disks. 
+
+Drela explains in the documentation that XROTOR has the capability 
+to "approximately model" the effects of an upstream or downstream 
+propeller. It is hoped that CROTOR realizes this approximate model 
+as a practical tool.
+
+-------------------------------------------------------------------
+ END: CRotor.doc
+ philip (at) esotec (dot) org
+-------------------------------------------------------------------
+

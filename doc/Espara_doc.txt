@@ -1,0 +1,355 @@
+
+Subroutine ESPARA User Guide                Last update: 3 Oct 2011
+-------------------------------------------------------------------       
+Philip Carter
+Esotec Developments
+philip (at) esotec (dot) org
+
+Current versions: 
+XROTOR code v7.55
+Subroutine ESPARA v0.8
+Package: CROTOR v755-ES1.0
+
+
+
+OVERVIEW
+
+Subroutine ESPARA adds a parametric analysis capability to XROTOR 
+for variable pitch rotors. The system consists of two components:
+
+ESPARA: A subroutine within XROTOR allowing the user to set up
+parameters for multi-axis parameter sweeps, then automatically 
+calculate analysis data which can be saved to a multi-rotor 
+Esprop database.
+
+ESPROP: A standalone utility that reads the resulting data file 
+and presents the data in a variety of ways.
+
+This document describes subroutine ESPARA. 
+A separate document describes ESPROP.
+
+Maximum array sizes can be changed globally by modifying the 
+following line in ESPARA.INC:
+
+      PARAMETER (NPROPA=12,NALTA=6,NPWRA=12,NRPMA=10,NVELA=15)
+C--number of..   rotors  altitudes  powers   rpms    velocities
+
+Corresponding ESPROP arrays should be changed accordingly.
+
+
+UNITS
+
+The parametric extensions were written to facilitate the comparison 
+and selection of constant speed and variable pitch propellers for 
+practical applications in the field. Accordingly, the units used 
+for parameter specification and data output differ from those used 
+within XROTOR itself - being essentially those familiar to the North 
+American aviation community. ESPARA takes care of all unit conversions 
+during I/O. The following units are used by both ESPARA and ESPROP:
+
+Velocity: knots
+Altitude: feet
+Power:    hp
+Thrust:   kgf
+
+(Since this mix of metric and imperial units may be unfamiliar to some, 
+user-specified units are planned as time permits...)
+
+
+PROGRAM OPERATION
+
+At XROTOR top level the command PARA brings up the .PARA menu and 
+command prompt (note that a rotor must be loaded):
+
+     OPEN f  Load Esprop database from disk'
+     SAVE<s> Save data to current Esprop file'
+     SAVA f  Save data to NEW Esprop file (Save As)'
+
+     DBAS<d> Display database parameters'
+     NEW     Enter   parameters for new database'
+     VEL     Modify  Velocity parameters'
+     RPM     Modify  RPM          "     '
+     POW     Modify  Power        "     '
+     ALT     Modify  Altitude     "     '
+
+     PROP<p> Display propeller statistics'
+     DELP i  Delete  propeller from database'
+     NAMP i  Modify  propeller name'
+     BLOC r  Modify  beta sample location (0->1)'
+
+     BOUN<b> Display analysis bounds'
+     BCLR    Clear   analysis bounds (full sweep)'
+     BVEL    Modify  Velocity  bounds'
+     BRPM    Modify  RPM         "   '
+     BPOW    Modify  Power       "   '
+     BALT    Modify  Altitude    "   '
+
+     RUN  i  Run parametric analysis sweep'
+    <ret>    Return to top level (unsaved data is lost)')
+
+
+.PARA c>
+
+
+OPEN, SAVE, SAVA
+
+The first three commands handle Esprop file I/O. 
+
+OPEN loads an Esprop file from disk, upon which analysis of the 
+loaded rotor can proceed immediately with RUN. 
+
+SAVE saves data to the current Esprop file. If no file has been 
+specified following NEW, the user is prompted for a filename. 
+
+SAVA functions as a "save as" command and will prompt for a new 
+filename. An Esprop file can be saved only after parameters have 
+been specified with NEW or an Esprop file has been opened.
+
+Note that no provisions are provided for retaining data in memory 
+when returning from ESPARA. A warning is provided upon exiting 
+ESPARA if unsaved parameter values or data exist.
+
+
+DBAS, NEW, VEL, RPM, POW, ALT
+
+Unless an Esprop database has been loaded, the first operation is 
+to specify parameter values by executing NEW. Parameters to be 
+specified are as follows:
+
+Velocity values (kts)  (space-delimited integers)
+Rpm values                       "
+Power values (hp)                "
+Altitude values (ft)             "
+
+For the sake of simplicity, integers are used for parameter value 
+entry and reporting (converted to real XROTOR units for analysis). 
+To facilitate convergence of the analyis routines each set of 
+parameter values should be specified as an ascending sequence.
+
+To ensure correct functioning of the plot routines in ESPROP at 
+least 2 values are required per parameter. 
+
+After the parameter values have been specified they can be 
+displayed with DBAS or modified with VEL, RPM, POW and ALT. Once 
+propeller analysis data exists, however, parameter values can no 
+longer be modified. 
+
+
+PROP
+
+The PROP command displays statistics concerning analysed rotors, 
+largely obvious with the possible exception of "Beta Stn" and
+"BetaRad". These refer to the XROTOR blade station at which blade 
+angle output is sampled (set indirectly with BLOC - see below). 
+
+
+DELP, NAMP
+
+Propellers can be deleted from the current database with DELP.
+Arrays are shuffled to maintain contiguous propeller indices.
+
+Propellers take the current XROTOR name upon analysis in ESPARA. 
+These names can be modified in the Esprop database at any later 
+time with NAMP (XROTOR names remain unchanged).
+
+
+BLOC (default 0.5)
+
+Sets relative location where blade angle is to be sampled
+(0=root, 1=tip). ESPARA finds the first blade station of equal 
+or greater radius for sampling blade angle data.
+
+
+ANALYSIS BOUNDS
+
+For a particular analysis run the user can choose between a 
+complete parameter sweep or any sequential subset. A full sweep 
+is the default. If desired, the bounds for a specific analysis run 
+can be reduced with BVEL, BRPM, BPOW, and BALT. BCLR returns 
+analysis bounds to the default full sweep.
+
+Current analysis bounds and operating point totals can be displayed 
+at any time with the command BOUN. 
+
+
+RUN
+
+The RUN command loops the current rotor through analysis at each 
+combination of operating parameters within the current analysis 
+bounds while saving output data to memory. 
+
+Command input assigns a propeller index. If the command input 
+matches a current database propeller index, ESPARA will overwrite 
+that index (following appropriate warnings). Otherwise the next 
+contiguous index is assigned.
+
+The program will run unattended and store converged data in 
+memory until convergence fails, at which point it will halt 
+analysis, display the unconverged state and present a command 
+prompt allowing input to assist convergence. When the parametric 
+analysis run is complete some statistics are displayed and the 
+data can be saved to disk with SAVE (or S).
+
+
+CONVERGENCE MENU             
+
+When the analysis routine fails to converge during an analysis run, 
+the user is presented with details about the unconverged point 
+followed by the convergence prompt:
+ 
+..CONV  c>
+
+? brings up the convergence menu:
+
+     <ret>    Continue
+     AUTO<a>  Auto-initialize blade angles and continue
+     ANGL r   Change blade angles manually
+     RPM      Analyse at current blade angle
+     FORM     Toggle between Graded Mom.and Potential Form
+     VRTX     Toggle between Graded Mom.and Vortex Form
+     WAKE     Toggle between rigid and self-deforming wake
+     INIT     Initialize next analysis case
+     REIN     Re-initialize rotor to known operating state
+     ASET     Change AUTO settings
+     SKIP     Give up trying to converge this point
+     STOP     Abort this run and return to .PARA prompt
+
+..CONV  c>
+
+Most commands duplicate those in OPER.
+
+<ret> tries to converge the current operating point, whether or not
+blade angles or analysis settings have been modified.
+
+AUTO promotes convergence by initializing blade angles. In some cases 
+the analysis code likes to converge from a higher loading, in other 
+cases from a lower loading. The AUTO command calculates the velocity 
+vector at a specific blade location and rotates the blade to match 
+it before the analysis is run. If that fails, the blade is rotated 
+to progressively greater increments above and below the velocity 
+vector. If the routine fails to converge after a specific number 
+of attempts the user is returned to the convergence prompt. If an
+operating point can be converged, in most cases AUTO will suffice.
+
+RPM analyses the propeller at the current operating point with the 
+current blade angle fixed to facilitate investigation of troublesome 
+operating points. Analysis data is not stored. If convergence can be 
+achieved by RPM following application of the available commands, 
+simply <ret> to continue the run.
+
+NOTE: Excessive blade stall or high mach numbers typically lead 
+to convergence problems. Hence, propeller geometries and database
+parameter ranges should be matched with care. If necessary, analysis 
+bounds can be set to broaden this relationship.
+
+
+ASET
+
+Change AUTO settings:
+
+- Maximum number of convergence attempts (default: 5).
+- Maximum deviation from the velocity vector to which the blades 
+  will be initialized, in degrees (default: 10.0).
+- Blade location where the velocity vector is sampled (default: 0.7).
+  (This is the relative distance from root to tip, not the radius.)
+
+Defaults are set in subroutine CRINIT in crotor.f, since subroutine 
+CROTOR calls the same blade angle initialization routine.
+
+
+SKIP, STOP
+
+These should be self-explanatory. If an operating point is skipped 
+the point is flagged as unconverged, the unconverged counter is 
+incremented, and the analysis run continues. 
+
+
+STORED DATA
+
+At each converged operating point the following information is 
+stored in memory:
+
+1. Blade Angle (deg), sampled at the current Beta station (BLOC).
+
+2. The percentage of the blade length that is stalled. A negative 
+stall is stored as a negative number. Due to the distance between 
+stations this quantity is of relatively coarse resolution, but is 
+useful information nonetheless.
+
+3. The mach number at the tip station.
+
+4. Advance ratio (J)
+
+5. Ideal Efficiency
+
+6. Induced Efficiency
+
+7. Efficiency
+
+8. Thrust (kgf)
+
+Each of these data can readily be presented for any series of 
+operating points in ESPROP.
+
+
+NOTES ON SETTING UP DATABASE PARAMETERS
+
+Setting up appropriate parameter values, then running rotors
+capable of operating over these parameter ranges, are keys to the
+effective use of ESPARA/ESPROP.
+
+An Esprop database can be regarded as representing a particular 
+application, such an an aircraft or a class of aircraft. Hence, 
+begin by determining the operating ranges, being the maximum and
+minimum values of each parameter. These would represent the operating
+envelope of the application. (Keep in mind that XROTOR cannot handle
+zero velocity.)
+
+Then determine the intervals between parameter values, hence the 
+total number of values in each case. Resist the tempation to skimp
+on parameter values to reduce analysis time or database size. In 
+general, smaller intervals between values yield faster and more
+reliable convergence along with more highly resolved output data 
+and smoother plots.
+
+
+IMPORTING BLADE GEOMETRIES
+
+The purpose of ESPARA is to provide comparative performance data
+for multiple propellers over a range of operating points, thus
+facilitating propeller selection for real-world applications. While
+in some cases the propellers will be designed directly in XROTOR,
+in other cases the user might wish to compare existing propellers,
+in which case the physical blade geometries must be read into XROTOR. 
+There are two ways to do this:
+
+ARBI
+The standard ARBI command at Top Level reads geometry data from the
+keyboard. See the XROTOR documentation.
+
+IMPO
+This command is implemented in subroutine ESIMP which is based 
+on subroutine ARBI. It performs the same function but reads the 
+geometry from a text file formatted as follows, with values space-
+delimited. Linear dimensions are in meters, blade angles in degrees.
+
+
+  Propeller name  [character string]
+  Tip radius     Hub radius     Number of stations [nst, integer]
+  Radius(1)      Chord(1)       Angle(1)
+  Radius(2)      Chord(2)       Angle(2)
+     .               .             .
+     .               .             .
+  Radius(nst)    Chord(nst)     Angle(nst)
+
+
+When an ESIMP file is successfully read the user will be prompted 
+for the number of blades and a preliminary flight speed. Blade 
+section properties should then be set in AERO to produce a complete
+specification of the propeller ready for analysis.
+
+==================================================================
+
+** END: ESPARA.DOC **
+ philip (at) esotec (dot) org
+

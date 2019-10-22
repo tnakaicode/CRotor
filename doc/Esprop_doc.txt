@@ -1,0 +1,641 @@
+
+ESPROP User Guide                               Last update: 8 Oct 2011
+-----------------------------------------------------------------------	
+Philip Carter
+Esotec Developments
+philip (at) esotec (dot) org
+
+Current version: ESPROP v0.8
+
+
+
+Parametric Extensions for XROTOR: Overview
+------------------------------------------
+The extensions add a parametric analysis capability to XROTOR for 
+constant speed and variable pitch rotors. The system consists of 
+two components:
+
+ESPARA: A subroutine within XROTOR that sets up parameters and 
+gathers and saves parametric data.
+
+ESPROP: A standalone utility that reads the resulting data file 
+and presents the data in a variety of ways.
+
+This document describes ESPROP. 
+A separate document describes subroutine ESPARA.
+
+Maximum array sizes can be changed globally by modifying the line:
+
+      PARAMETER (NPROPA=12,NALTA=6,NPWRA=12,NRPMA=10,NVELA=15)
+C--number of..   rotors  altitudes  powers   rpms    speeds
+
+(Corresponding ESPARA arrays should be changed accordingly.)
+
+UNITS
+
+The parametric extensions were written to facilitate the comparison 
+and selection of constant speed and variable pitch propellers for 
+practical applications in the field. Accordingly, the units used 
+for parameter specification and data output differ from those used 
+within XROTOR itself. ESPARA takes care of all unit conversions 
+during I/O. In particular, the following units are used by both 
+ESPARA and ESPROP:
+
+Velocity: knots
+Altitude: feet
+Power:    hp
+Thrust:   kgf
+
+------------------------------------------------------------------
+
+
+PROGRAM OPERATION
+
+ESPROP is run from the terminal:
+
+ % esprop
+
+The program will load then display a version header followed by 
+a menu listing and the ESPROP command prompt:
+ 	
+      =============================================
+ 	             ESPROP version 0.8
+	
+	      Display, Sorting, and Plotting of
+	    ESPROP Parametric Propeller Databases
+	           
+	       Esotec Developments, 2001-2011
+      =============================================	
+
+	OPEN f  Load ESPROP database file
+	DBAS    Display database parameters
+	SAVD    Save    database parameters to disk
+        PROP    Display propeller statistics
+        SAVP    Save    propeller statistics to disk
+
+	PENT    Enter output parameters (all)
+	STAT    Display numeric output status
+
+	EPRO    Enter new propeller list
+	CPRO    Add/remove propellers 
+	CVEL    Change Velociy points 
+	CPOW    Change Power      "  
+	CRPM    Change RPM        "  
+	CALT    Change Altitude   "  
+
+	LPRO    List Propellers at active points
+	LVEL    List Velocities      "  
+	LPOW    List Powers          "  
+	LRPM    List RPMs            "  
+	LALT    List Altitudes       "  
+
+       .PLOT    Plotting facility
+
+	SORT    Sort listings by efficiency toggle
+	SAVE    Save listings to disk toggle
+	TERM    Write listings to terminal toggle
+	PROM    Parameter prompt toggle
+
+	QUIT    Exit ESPROP
+
+  ESPROP >c
+
+A menu listing can subsequently be displayed at any level of the 
+program by typing a question mark at the command prompt.
+
+
+
+LOADING A DATABASE
+
+An .esprop format database file must be loaded before any other 
+commands will function:
+
+ ESPROP >c open
+
+A prompt will appear for the name of the database file. Entering the 
+database filename (and path, if not in the current directory) will 
+load the database and display a list of database parameters, along 
+with some information about the database itself.
+
+Alternatively, the database filename can be appended to the LOAD 
+command, achieving the same result in a single command:
+
+ ESPROP >c load Warp10.esprop
+
+
+
+DISPLAYING OR SAVING DATABASE PARAMETERS
+
+The Database Parameter List can subsequently be displayed by:
+
+ ESPROP >c dbas
+
+Or, alternatively, it can be saved to disk with:
+
+ ESPROP >c savd
+
+A prompt will appear for a filename. Upon providing the filename, 
+the file will be available immediately to other applications for 
+viewing or printing.
+
+
+
+DISPLAYING OR SAVING PROPELLER STATISTICS
+
+Some useful information about the propellers and convergence 
+statistics associated with the active database can be displayed by:
+
+ ESPROP >c prop
+
+Or alternatively it can be saved to disk with:
+
+ ESPROP >c savp
+
+
+NOTE: In order to retain horizontal alignment, any text files saved 
+by Esprop should be assigned a monospaced font (such as Courier) 
+when first opened in a word processor. Font size may also have to 
+be reduced for listings to fit across a page.
+
+
+
+ENTERING A PROPELLER LIST AND PARAMETER RANGES
+
+With a database loaded, an initial propeller list and output 
+parameter ranges for Airspeed, Rpm, Power, and Altitude must be 
+specified before any further action can take place. This is done 
+by the command:
+
+ ESPROP >c pent
+
+The program will display a list of parameter indices and values 
+(parameter prompt) for each parameter in turn and ask for parameter 
+indices to be entered. 
+
+Note that propellers and parameter ranges are specified by entering 
+their index integers - not their values. In each case, the integers 
+are entered on one line, separated by spaces.
+
+Propellers are specified simply by entering their indices, in any 
+order. Entering a zero will select all propellers in the current 
+database.
+
+Airspeed, Rpm, Power, and Altitude parameters are each specified by 
+entering the lower and upper bounds of the desired operating range, 
+in that order. A single integer will specify just that one value. 
+A zero will select the entire range of values present in the database.
+
+When output parameters have been entered for all 5 parameter types, 
+a summary of the current output status will be displayed, including 
+the total number of active operating points and the SAVE and SORT 
+status (described below).
+
+The Numeric Output Status summary can be displayed at any time by 
+the STAT command:
+
+ ESPROP >c stat
+
+The PENT command can be issued at any time when the user wishes to 
+specify a completely new set of propellers and output parameters.
+
+
+NOTE: Parameter prompts can be turned off or on  with the PROM 
+toggle (the default setting is ON). Turning prompts off can reduce 
+screen clutter when a user has become familiar with the various 
+parameters of a particular database. Or the user might choose to 
+refer to a printed database parameter listing.
+
+
+
+CHANGING THE PROPELLER LIST
+
+Changing the current propeller list offers two alternatives. 
+One can enter an entirely new list of propellers by:
+
+ ESPROP >c epro
+
+Or, alternatively, one can modify the current propeller list by:
+
+ ESPROP >c cpro
+
+Under CPRO, positive integers add propellers to the current list, 
+while negative integers remove propellers from the list.
+
+The CPRO command is useful if one wishes to add or remove 
+propellers from the list without having to respecify the entire 
+list. It can also be used to reorder the propeller list, since 
+any removals are done before additions.
+
+The Numeric Output Status summary is displayed after each change.
+
+
+
+CHANGING OUTPUT PARAMETERS
+
+Airspeed, RPM, Power, and Altitude parameters are changed  by:
+
+ ESPROP >c cvel
+ ESPROP >c crpm 
+ ESPROP >c cpow
+ ESPROP >c calt
+
+These commands behave identically to the initial entries under 
+the PENT command, with the exception that each command changes 
+the output range of just that one parameter type. 
+
+After the initial output ranges have been specified, any of these 
+commands can be aborted, without changes, by entering nothing at 
+the prompt.
+
+The Output Status summary is displayed after each change.
+
+
+NOTE: For each of the parameter index entry and modification 
+commands, error checking ensures that the user is specifying 
+legitimate parameter indices within the bounds of the current 
+database. Various messages will appear if input errors do occur, 
+in which case the user will generally be asked to reenter indices.
+
+
+
+GENERATING LIST OUTPUT
+
+When propellers and parameter ranges have been specified, the 
+following commands will list calculated performance data over 
+the active range of operating points, listed according to any 
+one of the 5 parameter types:
+
+ ESPROP >c lpro
+ ESPROP >c lvel
+ ESPROP >c lrpm
+ ESPROP >c lpow
+ ESPROP >c lalt
+
+The number of items in each list will clearly be equal to the 
+number of active output parameters for the parameter type being 
+listed. 
+
+The number of lists generated will be the product of the active 
+output parameters for all parameter types other than the one being 
+listed. 
+
+These commands can be issued at any time following the initial 
+output parameter entry, in any  sequence. 
+
+
+
+SORTING LIST OUTPUT
+
+Operating points within a list can be sorted according to 
+efficiency, from highest to lowest, by toggling the SORT command.
+
+ ESPROP >c sort
+
+This will cause subsequent listings to be sorted until the command 
+is issued again. 
+
+A message above each list will indicate whether or not the list 
+has been sorted (though this will generally be obvious).
+ 
+The Numeric Output Status summary displayed by STAT indicates 
+current SORT status.
+
+
+
+DIRECTING LIST OUTPUT
+
+Numeric output can be directed to the terminal, to a disk file, 
+or to both.
+
+A save file is opened by:
+
+ ESPROP >c save
+
+The user will be prompted for a filename, after which all subsequent 
+listings will be written to that file until the command is issued 
+again. A reminder will be displayed at the end of each listing if it 
+has been written to disk.
+
+A current file can be closed at any time by issuing the SAVE command 
+again. File save will be turned off and the file will immediately be 
+available to other applications. The next time the SAVE command is 
+issued, the user will be prompted for another filename.
+
+If a save file is open, terminal output can be turned off by:
+
+ ESPROP >c term
+
+This is useful if a large amount of listed data is to be archived 
+to disk.
+
+Terminal output will automatically be restored if the current save 
+file is closed.
+
+
+
+OUTPUT LIMITS AND WARNINGS
+
+With a large database, Esprop is quite capable of writing hundreds 
+of pages of listed data to the terminal, disk, or both, with a few 
+quick commands. For this reason, warnings are displayed if the user 
+asks to list more than a certain preset number of operating points. 
+
+There are two levels of warning: a casual warning and a strong 
+warning. Currently the casual warning is displayed if more than 
+100 operating points are specified, the strong warning if more than 
+1000 operating points are specified. 
+
+The limit warnings do not prevent the user from following through 
+with the action; they simply ask for confirmation and provide an 
+opportunity to back out.
+
+Plotting provides a corresponding warning system, except that the 
+warnings are displayed at lower limits - currently 25 and 100.
+
+
+
+LISTED PERFORMANCE DATA
+
+Numeric output listings display 8 calculated values for each active 
+operating point:
+
+Blade Angle
+-----------
+The angle (in degrees) of the blade chordline, sampled at the blade 
+radius indicated by "BetaRad" in the Propeller Summary.
+
+Stall%
+------
+The percentage of the blade length which is stalled. Positive 
+numbers indicate a positive stall (separation off the forward 
+surface, at positive lift coefficients), while negative quantities 
+indicate a negative stall (negative lift coefficients).
+
+This quantity is arrived at by calculating the distance between 
+the innermost stalled blade station and one half station outboard 
+of the outermost stalled blade station, relative to blade length. 
+Since XROTOR's internal calculations typically divide the blade 
+into 30 blade stations, the resolution of this quantity can be 
+quite coarse, as much as 5%. It is nevertheless useful to provide 
+insight into how a propeller suits a particular operating point.
+
+Tip Mach
+--------
+The Mach number at the propeller tip.
+
+J
+-
+Advance ratio related to rotational speed. This is the more common 
+formulation of advance ratio, which is sometimes presented in a 
+form equivalent to J/PI.
+
+Ideal Efficiency
+----------------
+The efficiency of the "ideal" propeller of the same diameter at 
+that operating point, meaning one with minimum induced losses 
+and zero blade airfoil losses. XROTOR derives this number from 
+actuator disk theory. 
+
+Induced Efficiency
+------------------
+Efficiency of the specified propeller geometry assuming only 
+induced losses, neglecting blade airfoil drag. This number is 
+useful since comparison with the ideal efficiency provides insight 
+into how efficiently the propeller is accelerating the airmass, 
+while comparison with the net efficiency provides information 
+regarding blade airfoil losses.
+
+Efficiency
+----------
+The resultant predicted efficiency taking into account both 
+induced losses and blade airfoil losses.
+
+Thrust-kg
+---------
+Predicted thrust in kilograms force.
+
+
+
+PLOTTING
+
+The user can go to the .PLOT command prompt at any time after an 
+.esprop database is loaded:
+
+  ESPROP >c plot
+
+ .PLOT >c
+
+The .PLOT menu can then be displayed by entering "?":
+	
+	PENT    Enter plot output parameters
+ 	STAT    Display plot output status
+
+	EPRO    Enter new propeller list
+	CPRO    Add/remove propellers
+	CVEL    Change Velociy points
+	CPOW    Change Power     "
+	CRPM    Change RPM       "
+	CALT    Change Altitude  " 
+
+	SELP    Select plot types
+	EXEC    Execute plots
+
+	BATC    Batch plot toggle
+ 	COLO    Color hardcopy toggle
+ 	SIZE    Change plot window size
+
+       <ret>    Return to ESPROP prompt (numeric output)
+
+ .PLOT >c
+
+If propellers and parameter ranges have already been specified, a 
+Plot Output Status summary will be displayed when entering PLOT.  
+This summary is similar to the Numeric Output Status summary, with 
+the following differences: 
+
+1. A maximum of 8 propellers will be listed, since no more than 8 
+propellers can be plotted per plot run. Any propellers beyond 8 will 
+be truncated from the propeller list when entering PLOT, with 
+messages being displayed to this effect.
+
+2. A list of selected plot types is presented under the parameter 
+range listing. By default, just one plot type is selected when 
+entering PLOT (that being Efficiency vs. Velocity). Also shown is 
+the total number of plots required to plot the selected plot types 
+at each of the active operating points.
+
+3. Save and Sort status are replaced by Color/B&W Hardcopy and 
+Batch/Interactive Plotting status.
+
+
+If propellers and operating parameters have not already been 
+specified when entering PLOT, a Plot Output Status summary will not 
+be displayed and the user must begin by specifying propellers and 
+parameter ranges:
+
+ .PLOT >c pent
+
+As at the ESPROP prompt, the Output Status summary can then be 
+displayed at any time by:
+
+ .PLOT >c stat
+
+Following the initial specification, the propeller list and output 
+parameter ranges can  be modified at any time in PLOT by any of:
+ 
+ .PLOT >c epro
+ .PLOT >c cpro
+ .PLOT >c cvel
+ .PLOT >c cpow 
+ .PLOT >c crpm
+ .PLOT >c calt
+
+These commands behave identically to those at the ESPROP prompt, 
+with the exception that no more than 8 propellers can be specified 
+at a time. 
+
+
+
+SPECIFYING PLOT TYPES
+
+Eight plot types are currently implemented. Any combination can be 
+selected by the SELP command:
+
+ .PLOT >c selp
+
+A list of available plot types is presented:
+
+ ----------------------
+  1  Effy  vs Velocity
+  2  Effy  vs Power
+  3  Effy  vs RPM
+  4  Effy  vs Altitude
+
+  5  Thrst vs Velocity
+  6  Thrst vs Power
+  7  Thrst vs RPM
+  8  Thrst vs Altitude
+ ----------------------
+
+Plot types are selected by entering their corresponding indices in 
+any sequence. Entering a zero will select all plot types. The Plot 
+Output Status summary will be displayed showing the selected plot 
+types and an updated calculation of plot quantities.
+
+
+NOTE: While at the .PLOT prompt the user can return to the ESPROP 
+prompt at any time simply by hitting <return>. The Numeric Output 
+Status will then reflect the most current Plot Output Status - no 
+more than 8 propellers will be specified. Modifications to the 
+numeric output specifications can then proceed as normal.
+
+
+GENERATING PLOTS
+
+When the parameter ranges and plot types of interest have been 
+selected, plotting is executed by the EXEC command:
+
+ .PLOT >c exec
+
+ESPROP will step through each plot type in the sequence entered, 
+plotting all active operating points before moving to the next 
+plot type.
+
+
+PLOT CONTROL MENU
+
+When in Interactive Plotting mode (the default), the user will be 
+taken to the ..PLOTC  prompt as each plot is generated. The Plot 
+Control menu can then be displayed if required by entering <?>:
+	
+        Plot Control Menu:
+       <ret>     Plot next operating point
+        REPL     Replot current plot
+        HARD     Save current plot to file plot.ps
+        STOP     Abandon this plot run
+
+One continues to the next plot (or back to the .PLOT prompt at 
+the end of a plot run) simply by:
+
+ ..PLOTC >c <return>
+
+XWindows has a habit of losing a plot rendering when returning 
+from another desktop: If this occurs, the current plot can  be 
+replotted by:
+
+ ..PLOTC >c repl
+
+If hardcopy is desired, a PostScript version of the current plot 
+will be saved to the disk file "plot.ps" by the following command:
+
+ ..PLOTC >c hard
+
+Or, if one wishes to abandon a plot run:
+
+ ..PLOTC >c stop
+
+The user is returned to the .PLOT command prompt.
+
+
+BATCH PLOTTING
+
+Esprop provides the opportunity to plot a large number of operating 
+points and plot types without user intervention. Batch plotting is 
+turned on or off with the command:
+
+ .PLOT >c batc
+
+The Plot Output Status summary will indicate whether batch mode or 
+interactive mode is active.
+
+As in interactive mode, plotting is initiated by: 
+
+ .PLOT >c exec
+
+The specified plot types will be plotted at the active operating 
+points and written to the file "plot.ps". 
+
+
+HARDCOPY COLOR
+
+PostScript hardcopy can be written in either color or black and 
+white. The user toggles between these two options with the command:
+
+ .PLOT >c colo
+
+The Plot Output Status summary will indicate whether color or black 
+and white hardcopy is active.
+
+
+PLOT WINDOW SIZE
+
+The plot window size is measured relative to screen size, and can 
+be adjusted by:
+
+ .PLOT >c size
+
+The user will be told the current relative window size and prompted 
+for a new value. Subsequent plots will appear at the adjusted 
+window size. Hardcopy size is unaffected.
+
+
+NOTE: Only one plot.ps file can be opened per Esprop session, and 
+will remain open until the user quits the program. If subsequent 
+sessions save further plots, an existing plot.ps file will be 
+clobbered. It is therefore important to move or rename the plot.ps 
+file at the end of a session. If any plots have been saved during 
+a particular session, a notice to this effect will appear when 
+the program is quit.
+
+
+SOURCES
+
+esprop.f
+esplots.f
+userio.f
+
+
+==================================================================
+
+** END: ESPROP_DOC **
+

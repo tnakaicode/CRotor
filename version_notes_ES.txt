@@ -1,0 +1,112 @@
+
+CROTOR Version Notes
+--------------------------------------------------------------------
+Version 755-ES1.3
+3 February 2015
+
+SAVB command in LOFT saves ESBLADE file to disk for importing into 3D CAD. Well worth a decimal point for those who have real world requirements...
+
+--------------------------------------------------------------------
+Version 755-ES1.2-win32
+24 January 2015
+
+This Windows build should be significantly more stable than ES1.1. Plotting and terminal output have been fixed, among many other glitches. 
+
+(Note that the plotting fix is a temporary workaround. It appears that a bug in the win-related plotlib code is causing problems with plot initialization, the workaround being replot calls following each plot. Cumbersome, but it works until a more elegant cure can be found...) 
+
+For convenience, docs have been converted to Windows line endings. 
+
+--------------------------------------------------------------------
+Version 755-ES1.2
+24 January 2015
+
+Minor update with three new commands (each solicited by the community).
+- PLOF at top level disables plot output.
+- PVEL and WVEL in OPER write slipstream data to terminal or disk. 
+
+--------------------------------------------------------------------
+Version 755-ES1.1
+19 January 2014
+
+Further extensions and tuneups to ESLOFTX:
+- Circular root blends.
+- Export blended geometry for analysis in OPER.
+- Live airfoil plots (PLOT and PLON). 
+- Hi-res loft plot (zoom in and see).
+
+--------------------------------------------------------------------
+Version 755-ES1.0
+5 January 2014
+
+Just one feature is added since the beta version: automatic inversion of windmill airfoils in ESLOFT. The code detects inverted airfoils in AERO and applies the WIND toggle if not already set. This is to ensure that beta corrections are handled correctly in ESLOFT according to alpha-zero data. The WIND setting inverts sections prior to rotation and translation, so lofting windmills is no different to lofting propellers.
+
+Also in this release, a variety of minor bug fixes and cosmetic tuneups in AERO and ESLOFTX. File Append now works (XROTOR bug according to gfortran).
+
+---------------------------------------------------------------------
+Version 755-ES1.0b 
+17 October 2011         
+
+Changes to XROTOR 7.55
+----------------------
+With the exception of plotting in AERO, changes represent added 
+features rather than changes to XROTOR itself, which remains fully 
+implemented. 
+
+Four commands are added at Top Level:
+
+   CROT   Counter-rotation design and analysis (subroutine CROTOR)
+   LOFT   Blade lofting facility (subroutine ESLOFTX)
+   PARA   Build ESPROP parametric database (subroutine ESPARA)
+   IMPO   Import geometry from text file (subroutine ESIMP)
+
+CROT is described in CRotor_doc.txt
+LOFT is described in Esloftx_doc.txt
+PARA is described in Espara_doc.txt
+IMPO is described at the end of Espara_doc
+
+The ESPROP utility is included in the build, see Esprop_doc.txt
+
+CROTOR automates the manual procedure for converging counter-rotating 
+systems in XROTOR. ESPARA gathers parametric data for direct comparison 
+of rotors over specified operating ranges in ESPROP. ESLOFT is a tool 
+for getting rotor designs out of XROTOR and into CAD.
+
+CROTOR and ESPARA leverage the XROTOR analysis engine, providing 
+degrees of automation along with storage and presentation of data. 
+The user can always validate CROTOR and ESPARA/ESPROP by running 
+analyses manually in XROTOR. 
+
+
+AERO
+Subroutine AERO has been modified for plotting polars at multiple 
+Reynolds numbers, primarily to assist in setting the REexp parameter. 
+The PLOT command in XROTOR 7.55 / AERO is replaced by four commands:
+
+   PLOM i  Plot airfoil polars at multiple Mach
+   PLOR i  Plot airfoil polars at multiple Re
+   SETM r  Set constant Mach for Re plots
+   SETR r  Set constant Re for Mach plots
+
+These are duplicated in the EDIT submenu and should be self-explanatory. 
+Mach/Reynolds numbers can be entered at the prompt or enter 'S' for 
+the standard set:
+Default Mach numbers: 0, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9 (unchanged)
+Default Reynolds: REref * 0.5, 0.75, 1, 1.5, 2
+
+
+Plot window size
+Since the plot library sizes plot windows as a proportion of vertical 
+screen size, portrait windows end up considerably smaller than landscape 
+windows. In this version portrait windows are scaled by a factor of 1.2 
+relative to landscape. Currently hardwired, this value can be changed in 
+module plutil.f, subroutine PLTINI, line 33, and in subroutine LOFTINIT1 
+(for ESLOFT plots), at the end of esloftx.f.
+
+The XROTOR menu at top level has been reorganized to what might be a 
+more natural layout for most users.
+
+
+Please report bugs...
+philip (at) esotec (dot) org
+
+
